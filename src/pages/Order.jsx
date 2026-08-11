@@ -71,14 +71,25 @@ export default function Order() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/orders', {
+      const SUPABASE_URL = 'https://dbuggsvlkytaxkbwwdzq.supabase.co/rest/v1/orders';
+      const SUPABASE_KEY = 'sb_publishable_obrjP8dKPrQE814rbrJwfA_rxEsjRNc';
+
+      const res = await fetch(SUPABASE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=representation',
+        },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
-      setResult(data.order);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'Failed to place order');
+      }
+      const rows = await res.json();
+      setResult(rows[0]);
       setForm(emptyForm);
     } catch (err) {
       setError(err.message || 'Could not connect to server.');
