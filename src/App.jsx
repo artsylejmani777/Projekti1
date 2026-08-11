@@ -5,6 +5,7 @@ import Home from './pages/Home.jsx';
 import Explorer from './pages/Explorer.jsx';
 import Services from './pages/Services.jsx';
 import Contact from './pages/Contact.jsx';
+import Order from './pages/Order.jsx';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/explorer" element={<Explorer />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/order" element={<Order />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </main>

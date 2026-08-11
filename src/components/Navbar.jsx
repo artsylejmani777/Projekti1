@@ -19,6 +19,7 @@ export default function Navbar() {
     { to: '/', label: 'Home' },
     { to: '/explorer', label: '3D Explorer' },
     { to: '/services', label: 'Services' },
+    { to: '/order', label: 'Buy Parts' },
     { to: '/contact', label: 'Contact' },
   ];
 
