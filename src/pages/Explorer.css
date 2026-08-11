@@ -1,0 +1,213 @@
+.explorer-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+.explorer-hero {
+  text-align: center;
+  padding: 100px 24px 48px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.explorer-hero h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  background: var(--gradient-hero);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.explorer-hero p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.explorer-scene {
+  flex: 1;
+  position: relative;
+  min-height: 600px;
+  background: radial-gradient(ellipse at center, #111827 0%, #0a0e17 70%);
+}
+
+.explorer-scene > div {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.explorer-scene canvas {
+  display: block;
+}
+
+/* Info Panel */
+.info-panel {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 100;
+  max-width: 420px;
+  width: calc(100% - 48px);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.info-panel-inner {
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.info-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.info-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.info-panel-header h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.info-close {
+  background: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0 4px;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.info-close:hover { opacity: 1; color: var(--text-primary); }
+
+.info-desc {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.info-panel-inner h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.info-specs {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.info-specs li {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 4px 0;
+  padding-left: 18px;
+  position: relative;
+}
+
+.info-specs li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.info-tip {
+  background: rgba(0,180,216,0.08);
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.info-tip strong { color: var(--accent); }
+
+/* Component legend */
+.explorer-legend {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 100;
+  background: rgba(17, 24, 39, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  font-size: 0.82rem;
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .explorer-legend { display: block; }
+}
+
+.explorer-legend h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.explorer-legend ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.explorer-legend li {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .explorer-hero h1 { font-size: 1.6rem; }
+  .explorer-hero p { font-size: 0.95rem; }
+  .info-panel { bottom: 12px; left: 12px; width: calc(100% - 24px); }
+}
