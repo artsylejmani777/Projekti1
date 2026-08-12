@@ -47,12 +47,17 @@
   display: block;
 }
 
-/* Open/Close Case button */
-.panel-toggle {
+/* Controls bar */
+.explorer-controls {
   position: absolute;
   top: 24px;
   left: 24px;
   z-index: 101;
+  display: flex;
+  gap: 10px;
+}
+
+.panel-toggle {
   background: rgba(17,24,39,0.9);
   backdrop-filter: blur(12px);
   border: 1px solid var(--accent);
@@ -68,6 +73,39 @@
 .panel-toggle:hover {
   background: rgba(0,180,216,0.12);
   box-shadow: 0 0 16px rgba(0,180,216,0.2);
+}
+
+.panel-toggle.secondary {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.panel-toggle.secondary:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.panel-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 101;
+  background: rgba(17,24,39,0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  pointer-events: none;
+  animation: fadeInOut 4s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 /* Info Panel */
