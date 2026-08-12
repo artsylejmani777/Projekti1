@@ -6,6 +6,7 @@ import Explorer from './pages/Explorer.jsx';
 import Services from './pages/Services.jsx';
 import Contact from './pages/Contact.jsx';
 import Order from './pages/Order.jsx';
+import Admin from './pages/Admin.jsx';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/services" element={<Services />} />
           <Route path="/order" element={<Order />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
       <Footer />

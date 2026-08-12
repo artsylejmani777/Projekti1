@@ -1,36 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Order.css';
 
-const PC_PARTS = [
-  { name: 'RAM DDR5 16GB (2x8GB)', price: 55 },
-  { name: 'RAM DDR5 32GB (2x16GB)', price: 105 },
-  { name: 'RAM DDR4 16GB (2x8GB)', price: 35 },
-  { name: 'SSD NVMe M.2 1TB', price: 65 },
-  { name: 'SSD NVMe M.2 2TB', price: 120 },
-  { name: 'SSD SATA 1TB', price: 50 },
-  { name: 'CPU Cooler (Air)', price: 35 },
-  { name: 'CPU Cooler (AIO Liquid)', price: 90 },
-  { name: 'PSU 650W 80+ Gold', price: 80 },
-  { name: 'PSU 750W 80+ Gold', price: 105 },
-  { name: 'PSU 850W 80+ Gold', price: 135 },
-  { name: 'GPU RTX 4060', price: 299 },
-  { name: 'GPU RTX 4070', price: 549 },
-  { name: 'GPU RTX 4080', price: 999 },
-  { name: 'CPU Intel i5-14600K', price: 280 },
-  { name: 'CPU Intel i7-14700K', price: 389 },
-  { name: 'CPU AMD Ryzen 7 7800X3D', price: 369 },
-  { name: 'CPU AMD Ryzen 5 7600X', price: 219 },
-  { name: 'Motherboard Z790', price: 220 },
-  { name: 'Motherboard B650', price: 165 },
-  { name: 'Case Mid-Tower ATX', price: 75 },
-  { name: 'Case Full-Tower ATX', price: 130 },
-  { name: 'Thermal Paste', price: 8 },
-  { name: 'Case Fans (3-Pack)', price: 25 },
-];
+const SB_URL = 'https://dbuggsvlkytaxkbwwdzq.supabase.co/rest/v1';
+const SB_KEY = 'sb_publishable_obrjP8dKPrQE814rbrJwfA_rxEsjRNc';
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY,
+};
 
 const emptyForm = {
   customer_name: '', email: '', phone: '', address: '',
-  part_name: '', quantity: 1, total_price: 0, notes: '',
+  product_id: '', product_name: '', quantity: 1, total_price: 0, notes: '',
 };
 
 export default function Order() {
@@ -38,24 +19,41 @@ export default function Order() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  const filteredParts = PC_PARTS.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    fetch(`${SB_URL}/products?select=*&order=category,name`, { headers: HEADERS })
+      .then(r => {
+        if (!r.ok) throw new Error('Products table not ready');
+        return r.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) setProducts(data);
+        else setProducts([]);
+      })
+      .catch(() => setProducts([]))
+      .finally(() => setProductsLoading(false));
+  }, []);
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.category.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => {
       const updated = { ...prev, [name]: value };
-      // Auto-calc total when part or quantity changes
-      if (name === 'part_name') {
-        const part = PC_PARTS.find(p => p.name === value);
-        updated.total_price = part ? part.price * (Number(updated.quantity) || 1) : 0;
+      if (name === 'product_id') {
+        const prod = products.find(p => String(p.id) === value);
+        updated.product_name = prod ? prod.name : '';
+        updated.total_price = prod ? Number(prod.price) * (Number(updated.quantity) || 1) : 0;
       }
       if (name === 'quantity') {
-        const part = PC_PARTS.find(p => p.name === updated.part_name);
-        updated.total_price = part ? part.price * (Number(value) || 0) : 0;
+        const prod = products.find(p => String(p.id) === updated.product_id);
+        updated.total_price = prod ? Number(prod.price) * (Number(value) || 0) : 0;
       }
       return updated;
     });
@@ -66,22 +64,14 @@ export default function Order() {
     setError(null);
     setResult(null);
 
-    if (!form.part_name) { setError('Please select a PC part.'); return; }
+    if (!form.product_id) { setError('Please select a product.'); return; }
     if (form.quantity < 1) { setError('Quantity must be at least 1.'); return; }
 
     setLoading(true);
     try {
-      const SUPABASE_URL = 'https://dbuggsvlkytaxkbwwdzq.supabase.co/rest/v1/orders';
-      const SUPABASE_KEY = 'sb_publishable_obrjP8dKPrQE814rbrJwfA_rxEsjRNc';
-
-      const res = await fetch(SUPABASE_URL, {
+      const res = await fetch(`${SB_URL}/orders`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=representation',
-        },
+        headers: { ...HEADERS, 'Prefer': 'return=representation' },
         body: JSON.stringify(form),
       });
       if (!res.ok) {
@@ -92,7 +82,7 @@ export default function Order() {
       setResult(rows[0]);
       setForm(emptyForm);
     } catch (err) {
-      setError(err.message || 'Could not connect to server.');
+      setError(err.message || 'Could not connect.');
     } finally {
       setLoading(false);
     }
@@ -102,25 +92,24 @@ export default function Order() {
     <div className="order-page">
       <section className="order-hero">
         <h1>Order PC Parts</h1>
-        <p>Browse our catalog, select your parts, and we&apos;ll deliver and install them at your home.</p>
+        <p>Browse our live catalog, select your parts, and we'll deliver and install them at your home.</p>
       </section>
 
       <section className="order-content">
         <div className="order-grid">
-          {/* Order Form */}
           <div className="order-form-wrap">
             {result ? (
               <div className="order-success">
                 <div className="success-icon">&#10003;</div>
                 <h2>Order Placed!</h2>
-                <p>Order <strong>#{result.id}</strong> for <strong>{result.part_name}</strong> has been registered.</p>
+                <p>Order <strong>#{result.id}</strong> for <strong>{result.product_name}</strong> has been registered.</p>
                 <div className="order-details-card">
                   <div className="od-row"><span>Customer</span><span>{result.customer_name}</span></div>
-                  <div className="od-row"><span>Part</span><span>{result.part_name}</span></div>
+                  <div className="od-row"><span>Product</span><span>{result.product_name}</span></div>
                   <div className="od-row"><span>Quantity</span><span>{result.quantity}x</span></div>
-                  <div className="od-row"><span>Total</span><span className="od-price">{result.total_price.toFixed(2)} EUR</span></div>
+                  <div className="od-row"><span>Total</span><span className="od-price">{Number(result.total_price).toFixed(2)} EUR</span></div>
                   <div className="od-row"><span>Status</span><span className="od-status pending">{result.status}</span></div>
-                  <div className="od-row"><span>Date</span><span>{result.created_at}</span></div>
+                  <div className="od-row"><span>Date</span><span>{new Date(result.created_at).toLocaleString()}</span></div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setResult(null)}>
                   Place Another Order
@@ -160,26 +149,34 @@ export default function Order() {
 
                 <h3>Order Details</h3>
                 <div className="form-group">
-                  <label htmlFor="part_search">Search Parts</label>
+                  <label htmlFor="part_search">Search Products</label>
                   <input id="part_search" type="text"
                     value={search} onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Type to filter parts..." />
+                    placeholder="Type to filter by name or category..." />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="part_name">Select Part *</label>
-                    <select id="part_name" name="part_name" required
-                      value={form.part_name} onChange={handleChange}
-                      size={6}>
-                      <option value="">-- Choose a part --</option>
-                      {filteredParts.map((p, i) => (
-                        <option key={i} value={p.name}>
-                          {p.name} — {p.price} EUR
-                        </option>
-                      ))}
-                    </select>
-                    {filteredParts.length === 0 && (
-                      <span className="form-hint">No parts match your search.</span>
+                    <label htmlFor="product_id">Select Product *</label>
+                    {productsLoading ? (
+                      <p className="form-hint">Loading products...</p>
+                    ) : products.length === 0 ? (
+                      <div className="form-hint" style={{padding:'16px',background:'rgba(251,191,36,0.08)',border:'1px solid rgba(251,191,36,0.2)',borderRadius:'var(--radius-sm)'}}>
+                        <strong>Products database not ready yet.</strong><br />
+                        Run <code>supabase-schema.sql</code> in your Supabase SQL editor to populate the catalog.
+                      </div>
+                    ) : (
+                      <select id="product_id" name="product_id" required
+                        value={form.product_id} onChange={handleChange} size={8}>
+                        <option value="">-- Choose a product --</option>
+                        {filteredProducts.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.name} — {Number(p.price)} EUR ({p.stock} in stock)
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {!productsLoading && products.length > 0 && filteredProducts.length === 0 && (
+                      <span className="form-hint">No products match your search.</span>
                     )}
                   </div>
                   <div className="form-group form-group-narrow">
@@ -203,34 +200,52 @@ export default function Order() {
                 {error && <div className="form-error">{error}</div>}
 
                 <button type="submit" className="btn btn-primary btn-lg" style={{width:'100%'}}
-                  disabled={loading}>
+                  disabled={loading || productsLoading}>
                   {loading ? 'Placing Order...' : 'Place Order'}
                 </button>
               </form>
             )}
           </div>
 
-          {/* Sidebar — Parts Catalog */}
+          {/* Sidebar catalog */}
           <div className="order-catalog">
             <div className="catalog-card">
-              <h3>Parts Catalog</h3>
+              <h3>Live Catalog</h3>
               <p className="catalog-sub">All prices include delivery &amp; installation</p>
-              <div className="catalog-list">
-                {PC_PARTS.map((p, i) => (
-                  <div key={i}
-                    className={`catalog-item${form.part_name === p.name ? ' selected' : ''}`}
-                    onClick={() => {
-                      setForm(prev => ({
-                        ...prev,
-                        part_name: p.name,
-                        total_price: p.price * (Number(prev.quantity) || 1),
-                      }));
-                    }}>
-                    <span className="catalog-name">{p.name}</span>
-                    <span className="catalog-price">{p.price} EUR</span>
-                  </div>
-                ))}
-              </div>
+              {productsLoading ? (
+                <p className="form-hint">Loading...</p>
+              ) : products.length === 0 ? (
+                <div className="form-hint" style={{padding:'12px',background:'rgba(251,191,36,0.08)',border:'1px solid rgba(251,191,36,0.2)',borderRadius:'var(--radius-sm)',fontSize:'0.82rem'}}>
+                  Run <code>supabase-schema.sql</code> in Supabase SQL editor.
+                </div>
+              ) : (
+                <div className="catalog-list">
+                  {products.map(p => (
+                    <div key={p.id}
+                      className={`catalog-item${String(form.product_id) === String(p.id) ? ' selected' : ''}${p.stock <= 0 ? ' out-of-stock' : ''}`}
+                      onClick={() => {
+                        if (p.stock <= 0) return;
+                        setForm(prev => ({
+                          ...prev,
+                          product_id: String(p.id),
+                          product_name: p.name,
+                          total_price: Number(p.price) * (Number(prev.quantity) || 1),
+                        }));
+                      }}>
+                      <div>
+                        <span className="catalog-name">{p.name}</span>
+                        <span className="catalog-cat">{p.category}</span>
+                      </div>
+                      <div className="catalog-right">
+                        <span className="catalog-price">{Number(p.price)} EUR</span>
+                        <span className={`catalog-stock ${p.stock <= 5 ? 'low' : ''}`}>
+                          {p.stock} left
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
