@@ -47,6 +47,29 @@
   display: block;
 }
 
+/* Open/Close Case button */
+.panel-toggle {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 101;
+  background: rgba(17,24,39,0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 10px 22px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.panel-toggle:hover {
+  background: rgba(0,180,216,0.12);
+  box-shadow: 0 0 16px rgba(0,180,216,0.2);
+}
+
 /* Info Panel */
 .info-panel {
   position: absolute;
