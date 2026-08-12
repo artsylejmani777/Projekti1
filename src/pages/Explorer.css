@@ -219,6 +219,55 @@
 
 .info-tip strong { color: var(--accent); }
 
+.info-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn-connection {
+  background: rgba(124,58,237,0.1);
+  border: 1px solid rgba(124,58,237,0.3);
+  color: #a78bfa;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex: 1;
+}
+
+.btn-connection:hover,
+.btn-connection.active {
+  background: rgba(124,58,237,0.2);
+  border-color: #8b5cf6;
+  color: #c4b5fd;
+}
+
+.btn-connection.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+.btn-connection.secondary:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.info-panel {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.info-panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Component legend */
 .explorer-legend {
   position: absolute;
